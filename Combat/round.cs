@@ -3,6 +3,7 @@ public class Round
     int RoundNumber;
     Fighter Fighter1;
     Fighter Fighter2;
+    Fighter? Winner;
 
     private Dictionary<Fighter, RoundFighterStats> Stats;
 
@@ -13,6 +14,8 @@ public class Round
 
         this.Fighter1 = fighter1;
         this.Fighter2 = fighter2;
+
+        this.Winner = null;
 
         this.Stats = new Dictionary<Fighter, RoundFighterStats>
         {
