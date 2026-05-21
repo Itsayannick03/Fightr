@@ -1,0 +1,14 @@
+/home/yannick/fightr/Fightr/bin/Debug/net10.0/Fightr
+/home/yannick/fightr/Fightr/bin/Debug/net10.0/Fightr.deps.json
+/home/yannick/fightr/Fightr/bin/Debug/net10.0/Fightr.runtimeconfig.json
+/home/yannick/fightr/Fightr/bin/Debug/net10.0/Fightr.dll
+/home/yannick/fightr/Fightr/bin/Debug/net10.0/Fightr.pdb
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/Fightr.GeneratedMSBuildEditorConfig.editorconfig
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/Fightr.AssemblyInfoInputs.cache
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/Fightr.AssemblyInfo.cs
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/Fightr.csproj.CoreCompileInputs.cache
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/Fightr.dll
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/refint/Fightr.dll
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/Fightr.pdb
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/Fightr.genruntimeconfig.cache
+/home/yannick/fightr/Fightr/obj/Debug/net10.0/ref/Fightr.dll
