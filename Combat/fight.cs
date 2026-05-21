@@ -23,18 +23,22 @@ public class Fight
         {
             roundWinner.SetRoundScore(10);
             roundLooser.SetRoundScore(9);
+            Debug.Log($"Score: {roundWinner.LastName} 10 - 9 {roundLooser.LastName}");
         }
         else if(result == RoundResult.DominantWin)
         {
             roundWinner.SetRoundScore(10);
             roundLooser.SetRoundScore(8);
-
+            Debug.Log($"Score: {roundWinner.LastName} 10 - 8 {roundLooser.LastName} (dominant)");
         }
         else
         {
             Fighter1.SetRoundScore(10);
             Fighter2.SetRoundScore(10);
+            Debug.Log("Score: 10 - 10 (draw round)");
         }
+
+        Debug.Log($"Cumulative: {Fighter1.LastName} {Fighter1.GetScore()} - {Fighter2.LastName} {Fighter2.GetScore()}");
     }
 
     private bool IsFightEndingResult(RoundResult result)
@@ -148,6 +152,9 @@ public class Fight
 
             if (this.currentRound < Rounds)
             {
+                Debug.Log($"Between rounds — fighters recover");
+                Debug.LogDetail($"  {Fighter1.LastName} stamina: {Fighter1.Stamina} → {(int)Math.Min(Fighter1.Stamina + Fighter1.Cardio * 0.25, Fighter1.Cardio)}, momentum drifts toward 0");
+                Debug.LogDetail($"  {Fighter2.LastName} stamina: {Fighter2.Stamina} → {(int)Math.Min(Fighter2.Stamina + Fighter2.Cardio * 0.25, Fighter2.Cardio)}, momentum drifts toward 0");
                 this.Fighter1.Recover();
                 this.Fighter2.Recover();
             }
@@ -157,16 +164,19 @@ public class Fight
 
         if (fightEndedEarly)
         {
+            Debug.Log($"Fight ends by KO — {this.winner?.LastName} wins at round {this.currentRound}");
             this.PrintStoppageResult(this.winner, this.looser, result, this.currentRound);
         }
         else
         {
             this.GetWinnerByDecision();
+            Debug.Log($"Fight goes to decision — {Fighter1.LastName}: {Fighter1.GetScore()}, {Fighter2.LastName}: {Fighter2.GetScore()}");
             this.PrintDecicionResult(this.winner, this.looser, this.Rounds);
         }
 
         if (winner == null)
         {
+            Debug.Log("Fight ends in a draw");
             PrintWinner(null);
         }
     }

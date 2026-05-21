@@ -25,6 +25,11 @@ public class Timer
             this.SecondsLeft = 0;
     }
 
+    public int GetRemaining()
+    {
+        return this.SecondsLeft;
+    }
+
     public bool IsTimeOut()
     {
         if(this.SecondsLeft == 0)

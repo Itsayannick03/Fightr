@@ -18,7 +18,7 @@ public class Fighter
     
     public int Momentum;
 
-    private int Aggression;
+    public int Aggression;
     private int AggressionMod;
 
     public Bodypart Head;
@@ -129,42 +129,57 @@ public class Fighter
     // Health functions
     public void TakeDamage(Bodypart bodypart, int damage)
     {
+        int before = bodypart.Health;
         bodypart.Health -= damage;
 
         if(bodypart.Health < 0)
             bodypart.Health = 0;
+
+        Debug.LogDetail($"{this.LastName} takes {damage} to {bodypart.Name} ({before} → {bodypart.Health})");
     }
 
     public void IncreaseStamina(int ammount)
     {
+        int before = this.Stamina;
         this.Stamina += ammount;
 
         if(this.Stamina > this.Cardio)
             this.Stamina = this.Cardio;
+
+        Debug.LogDetail($"{this.LastName} stamina {before} → {this.Stamina} (+{ammount})");
     }
 
     public void DecreaseStamina(int ammount)
     {
+        int before = this.Stamina;
         this.Stamina -= ammount;
 
         if(this.Stamina < 0)
             this.Stamina = 0;
+
+        Debug.LogDetail($"{this.LastName} stamina {before} → {this.Stamina} (-{ammount})");
     }
 
     public void IncreaseMomentum(int ammount)
     {
+        int before = this.Momentum;
         this.Momentum += ammount;
 
         if(this.Momentum > 10)
             this.Momentum = 10;
+
+        Debug.LogDetail($"{this.LastName} momentum {before} → {this.Momentum} (+{ammount})");
     }
 
     public void DecreaseMomentum(int ammount)
     {
+        int before = this.Momentum;
         this.Momentum -= ammount;
 
         if(this.Momentum < -10)
             this.Momentum = -10;
+
+        Debug.LogDetail($"{this.LastName} momentum {before} → {this.Momentum} ({-ammount})");
     }
 
     private void DriftMomentum(int ammount)
@@ -183,15 +198,15 @@ public class Fighter
         this.DriftMomentum(momemtumDrift);
 
         // Recover 25% of max stamina
-        int staminaRecovery = (int)Math.Round(this.Cardio * 0.25);
+        int staminaRecovery = (int)Math.Round(this.Cardio * 0.10);
         this.IncreaseStamina(staminaRecovery);
     }
 
     public void Circle()
     {
-        this.DriftMomentum(1);
+        
 
-        int staminaRecovery = Random.Shared.Next(1, 4);
+        int staminaRecovery = Random.Shared.Next(1, 3);
         this.IncreaseStamina(staminaRecovery);
     }
 
@@ -211,12 +226,15 @@ public class Fighter
     public int GetInitiativeScore()
     {
         Random random = new Random();
-        int score = random.Next(-10, 10);
+        int roll = random.Next(-10, 10);
         int staminaMod = (this.Stamina - (this.Cardio / 2)) / 10;
 
+        int score = roll;
         score += this.Momentum;
         score += staminaMod;
         score += this.AggressionMod;
+
+        Debug.LogDetail($"{this.LastName} initiative: roll={roll}, momentum={this.Momentum}, staminaMod={staminaMod}, aggrMod={this.AggressionMod} → total={score}");
 
         return score;
     }
@@ -304,9 +322,10 @@ public class Fighter
 
     public int CalculateDamage(Move move)
     {
+        double staminaMultiplier = 0.5 + 0.5 * (double)this.Stamina / this.Cardio;
         int powerModifier = (this.Power - 100) / 10;
 
-        int damage = move.Damage + powerModifier;
+        int damage =(int)((move.Damage + powerModifier) * staminaMultiplier);
 
         return damage;
     }
@@ -326,7 +345,12 @@ public class Fighter
 
         int roll = Random.Shared.Next(1, 101);
 
-        return roll <= attackChance;
+        bool willCircle = roll <= attackChance;
+
+        Debug.LogDetail($"{this.LastName} ShouldCircle: aggression={this.Aggression}, momentum={this.Momentum}×3, stamina={this.Stamina}/{this.Cardio}");
+        Debug.LogDetail($"  attackChance={attackChance}%, roll={roll}% → {(willCircle ? "circles" : "attacks")}");
+
+        return willCircle;
     }
 
     // Fight functions
@@ -344,7 +368,7 @@ public class Fighter
     private int GetAttackStats(Move move)
     {
         Random random = new Random();
-        int attackScore = random.Next(-5, 6);
+        int roll = random.Next(-5, 6);
 
         int modifier;
 
@@ -363,13 +387,19 @@ public class Fighter
                 break;
         }
 
-        return attackScore + modifier + move.AccuracyModifier;
+        int staminaMod = (int)((1.0 - (double)this.Stamina/this.Cardio) * -10);
+
+        int total = roll + modifier + move.AccuracyModifier + staminaMod;
+
+        Debug.LogDetail($"  {this.LastName} attack ({move.Name}): roll={roll}, statMod={modifier}, accuracy={move.AccuracyModifier} → {total}");
+
+        return total;
     }
 
     private int GetDefenseStats(Move move)
     {
         Random random = new Random();
-        int defenseScore = random.Next(-5, 6);
+        int roll = random.Next(-5, 6);
 
         int modifier;
 
@@ -387,7 +417,11 @@ public class Fighter
                 modifier = 0;
                 break;
         }
+        int staminaMod = (int)((1.0 - (double)this.Stamina/this.Cardio) * -10);
+        int total = roll + modifier + staminaMod;
 
-        return defenseScore + modifier;
+        Debug.LogDetail($"  {this.LastName} defense ({move.Name}): roll={roll}, statMod={modifier} → {total}");
+
+        return total;
     }
 }

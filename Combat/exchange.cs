@@ -30,6 +30,9 @@ public class Exchange
         int fighter1Initiative = this.Fighter1.GetInitiativeScore();
         int fighter2Initiative = this.Fighter2.GetInitiativeScore();
 
+        Debug.LogDetail($"{Fighter1.LastName} initiative: {fighter1Initiative}");
+        Debug.LogDetail($"{Fighter2.LastName} initiative: {fighter2Initiative}");
+
         if(fighter1Initiative > fighter2Initiative)
         {
             this.Attacker = this.Fighter1;
@@ -40,6 +43,8 @@ public class Exchange
             this.Attacker = this.Fighter2;
             this.Defender = this.Fighter1;
         }
+
+        Debug.Log($"{this.Attacker.LastName} wins initiative ({fighter1Initiative} vs {fighter2Initiative}) → will attack {this.Defender.LastName}");
     }
 
     public int GetExchangeTime(ExchangeOutcome result)
@@ -67,8 +72,13 @@ public class Exchange
         ExchangeOutcome outcome;
         if(this.Attacker.ShouldCircle())
         {
+            Debug.Log($"{this.Attacker.LastName} circles {this.Defender.LastName} (aggression {this.Attacker.Aggression}, stamina {this.Attacker.Stamina}/{this.Attacker.Cardio}, momentum {this.Attacker.Momentum})");
+            Debug.LogDetail($"  {this.Attacker.LastName} stamina: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
+
             this.Attacker.Circle();
             this.Defender.Circle();
+
+            Debug.LogDetail($"  After circle - {this.Attacker.LastName} stamina: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
 
             damage = 0;
             outcome = ExchangeOutcome.Circle;
@@ -79,8 +89,9 @@ public class Exchange
         }
 
         Random random = new Random();
-        
         int margin = this.Attacker.GetAttackMargin(this.Defender, attackMove);
+
+        Debug.LogDetail($"Margin: {margin} ({this.Attacker.LastName} vs {this.Defender.LastName})");
 
         double staminaMultiplier;
         if(margin <= -15)
@@ -91,13 +102,15 @@ public class Exchange
 
             int RoundedstaminaCost = (int)Math.Round(staminaCost);
 
+            Debug.LogDetail($"{this.Attacker.LastName} stamina before: {this.Attacker.Stamina}, cost: {RoundedstaminaCost}");
             this.Attacker.DecreaseStamina(RoundedstaminaCost);
             this.Attacker.DecreaseMomentum(1);
+            Debug.LogDetail($"{this.Attacker.LastName} stamina after: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
 
             damage = 0;
             outcome = ExchangeOutcome.BigWhiff;
 
-            
+            Debug.Log($"{this.Attacker.LastName} BIG WHIFF on {attackMove.Name} (margin {margin} ≤ -15, costly stamina penalty)");
         }
         else if(margin < 0)
         {
@@ -106,13 +119,14 @@ public class Exchange
 
             int RoundedstaminaCost = (int)Math.Round(staminaCost);
 
+            Debug.LogDetail($"{this.Attacker.LastName} stamina before: {this.Attacker.Stamina}, cost: {RoundedstaminaCost}");
             this.Attacker.DecreaseStamina(RoundedstaminaCost);
-            
+            Debug.LogDetail($"{this.Attacker.LastName} stamina after: {this.Attacker.Stamina}");
 
             damage = 0;
             outcome = ExchangeOutcome.Miss;
 
-            
+            Debug.Log($"{this.Attacker.LastName} misses {attackMove.Name} (margin {margin}, needed ≥ 0)");
         }
         else if(margin >= 15)
         {
@@ -123,17 +137,22 @@ public class Exchange
             int baseDamage = this.Attacker.CalculateDamage(attackMove);
             int totalDamage = baseDamage  * 2;
 
+            Debug.LogDetail($"{this.Attacker.LastName} stamina before: {this.Attacker.Stamina}, cost: {RoundedstaminaCost}");
+            Debug.LogDetail($"Base damage: {baseDamage}, CRIT multiplier x2 → total: {totalDamage}");
 
             this.Attacker.DecreaseStamina(RoundedstaminaCost);
-            this.Attacker.IncreaseMomentum(1);
+            this.Attacker.IncreaseMomentum(2);
 
             this.Defender.TakeDamage(bodypart, totalDamage);
-            this.Defender.DecreaseMomentum(1);
+            this.Defender.DecreaseMomentum(2);
+
+            Debug.LogDetail($"{this.Attacker.LastName} stamina after: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
+            Debug.LogDetail($"{this.Defender.LastName} {bodypart.Name} HP after: {bodypart.Health}");
 
             damage = totalDamage;
             outcome = ExchangeOutcome.Crit;
 
-           
+            Debug.Log($"{this.Attacker.LastName} CRITS {this.Defender.LastName} with {attackMove.Name} for {totalDamage} ({baseDamage} base × 2 = {totalDamage}, margin {margin} ≥ 15) — {bodypart.Name} HP: {bodypart.Health}");
         }
         else
         {
@@ -143,14 +162,22 @@ public class Exchange
 
             int totalDamage = this.Attacker.CalculateDamage(attackMove);
 
+            Debug.LogDetail($"{this.Attacker.LastName} stamina before: {this.Attacker.Stamina}, cost: {RoundedstaminaCost}");
+            Debug.LogDetail($"Damage: {totalDamage}");
+
             this.Attacker.DecreaseStamina(RoundedstaminaCost);
+            this.Attacker.IncreaseMomentum(1);
 
             this.Defender.TakeDamage(bodypart, totalDamage);
             this.Defender.DecreaseMomentum(1);
 
+            Debug.LogDetail($"{this.Attacker.LastName} stamina after: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
+            Debug.LogDetail($"{this.Defender.LastName} {bodypart.Name} HP after: {bodypart.Health}");
+
             damage = totalDamage;
             outcome = ExchangeOutcome.Hit;
 
+            Debug.Log($"{this.Attacker.LastName} hits {this.Defender.LastName} with {attackMove.Name} for {totalDamage} ({attackMove.Damage} base + {(this.Attacker.Power - 100) / 10} power, margin {margin}) — {bodypart.Name} HP: {bodypart.Health}");
         }
 
         Attack attack = new Attack(damage, outcome);
@@ -200,6 +227,10 @@ public class Exchange
         Move attackMove = this.Attacker.GetMove();
         Bodypart targetBodypart = this.Defender.GetBodypart(attackMove);
 
+        Debug.Log($"{this.Attacker.LastName} chooses {attackMove.Name} → targets {this.Defender.LastName}'s {targetBodypart.Name}");
+        Debug.LogDetail($"  {this.Attacker.LastName} stamina: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
+        Debug.LogDetail($"  {this.Defender.LastName} stamina: {this.Defender.Stamina}, momentum: {this.Defender.Momentum}");
+
         Attack attack = this.resolveAttack(attackMove, targetBodypart);
 
         this.handleResult(attack.Outcome, targetBodypart, attackMove);
@@ -223,6 +254,8 @@ public class Exchange
             exchangeOutcome = ExchangeOutcome.Miss;
 
         int timeTaken = this.GetExchangeTime(exchangeOutcome);
+
+        Debug.LogDetail($"  Time taken: {timeTaken}s");
 
         return new ExchangeSummary(this.Attacker, this.Defender, damage, exchangeOutcome, timeTaken);
 

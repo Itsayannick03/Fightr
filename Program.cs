@@ -1,4 +1,8 @@
-﻿Fighter fighter1 = new Fighter(
+﻿Debug.Enabled = true;
+Debug.Detailed = false;
+Debug.StepThrough = false;
+
+Fighter fighter1 = new Fighter(
     "Alex",
     "Stone",
     115, // Striking
@@ -25,7 +29,7 @@ Fighter fighter2 = new Fighter(
     110, // Cardio
     100, // Power
     115, // Chin
-    5   // Aggression
+    50   // Aggression
 );
 
 

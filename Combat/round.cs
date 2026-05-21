@@ -22,7 +22,7 @@ public class Round
   
     }
 
-    private double GetRoundScore(Dictionary<StatType, int> roundStats)
+    private double GetRoundScore(Dictionary<StatType, int> roundStats, string fighterName)
     {
         double roundScore = 0;
         foreach (var stat in roundStats)
@@ -32,9 +32,13 @@ public class Round
 
             double weight = StatTypeHelper.ScoreWeights[type];
 
-            roundScore += weight * quantity;
+            double contribution = weight * quantity;
+            roundScore += contribution;
 
+            Debug.LogDetail($"  {fighterName} stat {type}: {quantity} × {weight:N1} = {contribution:N1}");
         }
+
+        Debug.LogDetail($"  {fighterName} round score: {roundScore:N1}");
 
         return roundScore;
     }
@@ -46,15 +50,26 @@ public class Round
     {
         Console.WriteLine($"Fighter 1 round score: {fighter1Score}");
         Console.WriteLine($"Fighter 2 round score: {fighter2Score}");
-        Console.ReadLine();
-        
+
+        Debug.Log($"{this.Fighter1.LastName} round score: {fighter1Score:N1}, {this.Fighter2.LastName} round score: {fighter2Score:N1}");
+
         if(Math.Abs(fighter1Score - fighter2Score) <= 5)
+        {
             this.Winner = null;
+            Debug.Log("Round result: Draw");
+        }
         else if(fighter1Score > fighter2Score)
+        {
             this.Winner = this.Fighter1;
+            Debug.Log($"Round result: {this.Fighter1.LastName} wins");
+        }
         else
+        {
             this.Winner = this.Fighter2;
-        
+            Debug.Log($"Round result: {this.Fighter2.LastName} wins");
+        }
+
+        Console.ReadLine();
     }
 
     public void PrintCurrentTime(Timer timer)
@@ -101,11 +116,14 @@ public class Round
         
 
         Console.WriteLine($"Round: {this.RoundNumber}");
+        Debug.Log($"Round {this.RoundNumber} starts — Timer: 5:00");
         
         while(!timer.IsTimeOut())
         {
             Console.Write($"(Round: {RoundNumber})");
             timer.PrintTime();
+            Debug.LogDetail($"Timer before exchange: {timer.GetRemaining() / 60}:{(timer.GetRemaining() % 60):D2}");
+
             Exchange exchange = new Exchange(this.Fighter1, this.Fighter2);
 
             ExchangeSummary summary = exchange.Run();
@@ -114,10 +132,27 @@ public class Round
             ExchangeOutcome result = summary.Result;
             
             timer.ReduceTime(time);
+            Debug.LogDetail($"Timer after exchange: {timer.GetRemaining() / 60}:{(timer.GetRemaining() % 60):D2} (elapsed: {time}s)");
+
+            if(Debug.StepThrough)
+            {
+                while(true)
+                {
+                    Console.Write("  Press Enter to continue, s for stats...");
+                    string input = Console.ReadLine() ?? "";
+                    if(input == "") break;
+                    else if(input.ToLower() == "s")
+                    {
+                        Fighter1.GetFighterInfo();
+                        Fighter2.GetFighterInfo();
+                    }
+                }
+            }
 
             if(result == ExchangeOutcome.Knockout)
             {
                 //Console.WriteLine("#### KOCKOUT ####");
+                Debug.Log($"KNOCKOUT! {this.Winner?.LastName ?? "Unknown"} wins by KO!");
                 if(this.Fighter1.IsKnockedOut())
                     this.Winner = this.Fighter2;
                 else
@@ -129,7 +164,7 @@ public class Round
         }
 
 
-        
+        Debug.Log($"Round {this.RoundNumber} time expired");
 
         this.ComputeRoundDelta(this.Fighter1Stats, this.Fighter1);
       
@@ -137,16 +172,20 @@ public class Round
         this.ComputeRoundDelta(this.Fighter2Stats, this.Fighter2);
       
 
-        double fighter1Score = this.GetRoundScore(Fighter1Stats);
-        double fighter2Score = this.GetRoundScore(Fighter2Stats);
+        Debug.Log($"Computing round {this.RoundNumber} scores:");
+        double fighter1Score = this.GetRoundScore(Fighter1Stats, this.Fighter1.LastName);
+        double fighter2Score = this.GetRoundScore(Fighter2Stats, this.Fighter2.LastName);
 
         this.DetermainRoundWinner(fighter1Score, fighter2Score);
 
         Fighter1.GetFighterInfo();
         Fighter2.GetFighterInfo();
 
-        if(fighter1Score - fighter2Score > 30 || fighter2Score-fighter1Score > 30)
+        if(fighter1Score > fighter2Score * 3|| fighter2Score > fighter1Score * 3)
+        {
+            Debug.Log("Dominant win (score diff > 30)");
             return RoundResult.DominantWin;
+        }
 
 
         if(this.Winner == this.Fighter1)
