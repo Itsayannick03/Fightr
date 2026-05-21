@@ -184,6 +184,16 @@ public class Exchange
         }
     }
 
+    private void HandleStats(int damage, Fighter attacker)
+    {
+        if(damage < 5)
+            attacker.IncreaseStat(StatType.Strikes, 1);
+        else
+            attacker.IncreaseStat(StatType.SignificantStrikes, 1);
+        
+        attacker.IncreaseStat(StatType.DamageDealt, damage);
+    }
+
     public ExchangeSummary Run()
     {
         this.ResolveInitiative();
@@ -199,9 +209,17 @@ public class Exchange
         
         ExchangeOutcome exchangeOutcome;
         if(Fighter1.IsKnockedOut() || Fighter2.IsKnockedOut())
+        {
             exchangeOutcome = ExchangeOutcome.Knockout;
+            this.HandleStats(damage, this.Attacker);
+        }
+            
         else if(attack.Outcome == ExchangeOutcome.Crit || attack.Outcome == ExchangeOutcome.Hit)
+        {
             exchangeOutcome = ExchangeOutcome.Hit;
+            this.HandleStats(damage, this.Attacker);
+        }
+            
         else
             exchangeOutcome = ExchangeOutcome.Miss;
 

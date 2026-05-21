@@ -33,6 +33,7 @@ public class Fighter
 
     // stats
     private int Score;
+    public Dictionary<StatType, int> Stats { get; private set; } = new Dictionary<StatType, int>();    
 
 
     public Fighter(string firstName, string lastName, int striking, int strikingDefense, int kicking, int kickingDefense, int wrestling, int grappling, int cardio, int power, int chin, int aggression)
@@ -92,6 +93,11 @@ public class Fighter
         this.Moves.Add(MoveList.headKick);
         this.Moves.Add(MoveList.frontKick);
 
+        Stats.Add(StatType.Strikes, 0);
+        Stats.Add(StatType.SignificantStrikes, 0);
+
+        Stats.Add(StatType.DamageDealt, 0);
+
     }
 
     // Info
@@ -111,6 +117,13 @@ public class Fighter
         Console.WriteLine("Momentum: " + this.Momentum);
         Console.WriteLine("###############\n");
 
+    }
+
+    // Stat functions
+
+    public void IncreaseStat(StatType statType, int ammount)
+    {
+        this.Stats[statType] += ammount;
     }
 
     // Health functions

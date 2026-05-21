@@ -1,11 +1,12 @@
 public class Round
 {
-    int RoundNumber;
+    public int RoundNumber;
     Fighter Fighter1;
     Fighter Fighter2;
-    Fighter? Winner;
+    public Fighter? Winner { get; private set; }
+    private Dictionary<StatType, int> Fighter1Stats = new Dictionary<StatType, int>();
+    private Dictionary<StatType, int> Fighter2Stats = new Dictionary<StatType, int>();
 
-    private Dictionary<Fighter, RoundFighterStats> Stats;
 
     
     public Round(int roundNumber, Fighter fighter1, Fighter fighter2)
@@ -14,77 +15,85 @@ public class Round
 
         this.Fighter1 = fighter1;
         this.Fighter2 = fighter2;
-
         this.Winner = null;
 
-        this.Stats = new Dictionary<Fighter, RoundFighterStats>
+        this.Fighter1Stats = new Dictionary<StatType, int>(fighter1.Stats);
+        this.Fighter2Stats = new Dictionary<StatType, int>(fighter2.Stats);
+  
+    }
+
+    private double GetRoundScore(Dictionary<StatType, int> roundStats)
+    {
+        double roundScore = 0;
+        foreach (var stat in roundStats)
         {
-            { fighter1, new RoundFighterStats() },
-            { fighter2, new RoundFighterStats() }
-        };
-    }
+            StatType type = stat.Key;
+            int quantity = stat.Value;
 
-    private enum RoundWinner
-    {
-        fighter1,
-        fighter2,
-        draw
-    }
+            double weight = StatTypeHelper.ScoreWeights[type];
 
-    private void UpdateStats(Fighter attacker, ExchangeSummary summary)
-    {
-        Stats[attacker].ApplyExchangeSummary(summary);
-    }
+            roundScore += weight * quantity;
 
-    private RoundWinner DetermainRoundWinner()
-    {
-        
-        double fighter1Score = Stats[Fighter1].GetScoreValue();
-        double fighter2Score = Stats[Fighter2].GetScoreValue();
-
-        Console.WriteLine($"{this.Fighter1.LastName}: {fighter1Score}");
-        Console.WriteLine($"{this.Fighter2.LastName}: {fighter2Score}");
-
-        //Thread.Sleep(5000);
-
-
-        if (fighter1Score > fighter2Score)
-        {
-            return RoundWinner.fighter1;
         }
-        else if (fighter2Score > fighter1Score)
-        {
-            return RoundWinner.fighter2;
-        }
+
+        return roundScore;
+    }
+   
+
+   
+
+    private void DetermainRoundWinner(double fighter1Score, double fighter2Score)
+    {
+        // Console.WriteLine($"Fighter 1 round score: {fighter1Score}");
+        // Console.WriteLine($"Fighter 2 round score: {fighter2Score}");
+        // Console.ReadLine();
+
+        if(fighter1Score == fighter2Score)
+            this.Winner = null;
+        else if(fighter1Score > fighter2Score)
+            this.Winner = this.Fighter1;
         else
-        {
-            return RoundWinner.draw;
-        }
+            this.Winner = this.Fighter2;
+        
+    }
+
+    public void PrintCurrentTime(Timer timer)
+    {
+        timer.PrintTime();
     }
 
     
 
 
-    private void CommentRoundWinner(RoundWinner result)
+    // private void CommentRoundWinner(RoundWinner result)
+    // {
+    //     Console.Write("Commentary: ");
+
+    //     switch(result)
+    //     {
+    //         case RoundWinner.fighter1:
+    //             Console.WriteLine($"That was a nice round! I'd give that a 10-9 in favor of {this.Fighter1.LastName}");
+    //             break;
+    //         case RoundWinner.fighter2:
+    //             Console.WriteLine($"That was a nice round! I'd give that a 10-9 in favor of {this.Fighter2.LastName}");
+    //             break;
+    //         case RoundWinner.draw:
+    //             Console.WriteLine($"Thats a tough one! I'd Give that a 10-10");
+    //             break;
+
+    //     }
+        
+        
+    // }
+
+    private void ComputeRoundDelta(Dictionary<StatType, int> snapshot, Fighter fighter)
+{
+    foreach (var stat in snapshot)
     {
-        Console.Write("Commentary: ");
-
-        switch(result)
-        {
-            case RoundWinner.fighter1:
-                Console.WriteLine($"That was a nice round! I'd give that a 10-9 in favor of {this.Fighter1.LastName}");
-                break;
-            case RoundWinner.fighter2:
-                Console.WriteLine($"That was a nice round! I'd give that a 10-9 in favor of {this.Fighter2.LastName}");
-                break;
-            case RoundWinner.draw:
-                Console.WriteLine($"Thats a tough one! I'd Give that a 10-10");
-                break;
-
-        }
-        
-        
+        snapshot[stat.Key] = fighter.Stats[stat.Key] - stat.Value;
     }
+
+}
 
     public RoundResult run()
     {
@@ -109,21 +118,36 @@ public class Round
             if(result == ExchangeOutcome.Knockout)
             {
                 //Console.WriteLine("#### KOCKOUT ####");
+                if(this.Fighter1.IsKnockedOut())
+                    this.Winner = this.Fighter2;
+                else
+                    this.Winner = this.Fighter1;
+
                 return RoundResult.Knockout;
             }
-            
-            this.UpdateStats(summary.Attacker, summary);
-            //Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
         }
 
-        RoundWinner winner = this.DetermainRoundWinner();
+
+        
+
+        this.ComputeRoundDelta(this.Fighter1Stats, this.Fighter1);
+      
+
+        this.ComputeRoundDelta(this.Fighter2Stats, this.Fighter2);
+      
+
+        double fighter1Score = this.GetRoundScore(Fighter1Stats);
+        double fighter2Score = this.GetRoundScore(Fighter2Stats);
+
+        this.DetermainRoundWinner(fighter1Score, fighter2Score);
 
         Fighter1.GetFighterInfo();
         Fighter2.GetFighterInfo();
 
-        if(winner == RoundWinner.fighter1)
+        if(this.Winner == this.Fighter1)
             return RoundResult.Fighter1Win;
-        else if(winner == RoundWinner.fighter2)
+        else if(this.Winner == this.Fighter2)
             return RoundResult.Fighter2Win;
         else
             return RoundResult.Draw;
