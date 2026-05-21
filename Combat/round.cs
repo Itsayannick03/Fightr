@@ -44,11 +44,11 @@ public class Round
 
     private void DetermainRoundWinner(double fighter1Score, double fighter2Score)
     {
-        // Console.WriteLine($"Fighter 1 round score: {fighter1Score}");
-        // Console.WriteLine($"Fighter 2 round score: {fighter2Score}");
-        // Console.ReadLine();
-
-        if(fighter1Score == fighter2Score)
+        Console.WriteLine($"Fighter 1 round score: {fighter1Score}");
+        Console.WriteLine($"Fighter 2 round score: {fighter2Score}");
+        Console.ReadLine();
+        
+        if(Math.Abs(fighter1Score - fighter2Score) <= 10)
             this.Winner = null;
         else if(fighter1Score > fighter2Score)
             this.Winner = this.Fighter1;
