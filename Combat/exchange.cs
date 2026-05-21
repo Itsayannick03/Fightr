@@ -92,7 +92,7 @@ public class Exchange
             int RoundedstaminaCost = (int)Math.Round(staminaCost);
 
             this.Attacker.DecreaseStamina(RoundedstaminaCost);
-            this.Attacker.DecreaseMomentum(2);
+            this.Attacker.DecreaseMomentum(1);
 
             damage = 0;
             outcome = ExchangeOutcome.BigWhiff;
@@ -107,7 +107,7 @@ public class Exchange
             int RoundedstaminaCost = (int)Math.Round(staminaCost);
 
             this.Attacker.DecreaseStamina(RoundedstaminaCost);
-            this.Attacker.DecreaseMomentum(1);
+            
 
             damage = 0;
             outcome = ExchangeOutcome.Miss;
@@ -125,10 +125,10 @@ public class Exchange
 
 
             this.Attacker.DecreaseStamina(RoundedstaminaCost);
-            this.Attacker.IncreaseMomentum(2);
+            this.Attacker.IncreaseMomentum(1);
 
             this.Defender.TakeDamage(bodypart, totalDamage);
-            this.Defender.DecreaseMomentum(2);
+            this.Defender.DecreaseMomentum(1);
 
             damage = totalDamage;
             outcome = ExchangeOutcome.Crit;
@@ -144,7 +144,6 @@ public class Exchange
             int totalDamage = this.Attacker.CalculateDamage(attackMove);
 
             this.Attacker.DecreaseStamina(RoundedstaminaCost);
-            this.Attacker.IncreaseMomentum(1);
 
             this.Defender.TakeDamage(bodypart, totalDamage);
             this.Defender.DecreaseMomentum(1);

@@ -178,8 +178,8 @@ public class Fighter
 
     public void Recover()
     {
-        // Momentum drifts 50% towards 0
-        int momemtumDrift = (int)Math.Round(this.Momentum * 0.5);
+        // Momentum drifts 25% towards 0
+        int momemtumDrift = (int)Math.Round(this.Momentum * 0.25);
         this.DriftMomentum(momemtumDrift);
 
         // Recover 25% of max stamina
@@ -344,7 +344,7 @@ public class Fighter
     private int GetAttackStats(Move move)
     {
         Random random = new Random();
-        int attackScore = random.Next(-10, 11);
+        int attackScore = random.Next(-5, 6);
 
         int modifier;
 
@@ -369,7 +369,7 @@ public class Fighter
     private int GetDefenseStats(Move move)
     {
         Random random = new Random();
-        int defenseScore = random.Next(-10, 11);
+        int defenseScore = random.Next(-5, 6);
 
         int modifier;
 
