@@ -53,7 +53,8 @@ public class Round
 
         Debug.Log($"{this.Fighter1.LastName} round score: {fighter1Score:N1}, {this.Fighter2.LastName} round score: {fighter2Score:N1}");
 
-        if(Math.Abs(fighter1Score - fighter2Score) <= 5)
+        double diff = Math.Abs(fighter1Score - fighter2Score);
+        if(diff <= 5)
         {
             this.Winner = null;
             Debug.Log("Round result: Draw");
@@ -181,21 +182,30 @@ public class Round
         Fighter1.GetFighterInfo();
         Fighter2.GetFighterInfo();
 
-        if(fighter1Score > fighter2Score * 3|| fighter2Score > fighter1Score * 3)
+        if(fighter1Score - fighter2Score > 50 || fighter2Score - fighter1Score > 50)
         {
-            Debug.Log("Dominant win (score diff > 30)");
+            string winnerName = fighter1Score > fighter2Score ? Fighter1.LastName : Fighter2.LastName;
+            string loserName = fighter1Score > fighter2Score ? Fighter2.LastName : Fighter1.LastName;
+            Console.WriteLine($"  {winnerName} 10 - 8 {loserName}");
+            Debug.Log("Dominant win");
             return RoundResult.DominantWin;
         }
 
-
         if(this.Winner == this.Fighter1)
+        {
+            Console.WriteLine($"  {Fighter1.LastName} 10 - 9 {Fighter2.LastName}");
             return RoundResult.Fighter1Win;
-    
-            
+        }
         else if(this.Winner == this.Fighter2)
+        {
+            Console.WriteLine($"  {Fighter2.LastName} 10 - 9 {Fighter1.LastName}");
             return RoundResult.Fighter2Win;
+        }
         else
+        {
+            Console.WriteLine("  10 - 10 (draw)");
             return RoundResult.Draw;
+        }
 
         
     }
