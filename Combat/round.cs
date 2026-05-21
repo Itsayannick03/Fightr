@@ -48,7 +48,7 @@ public class Round
         Console.WriteLine($"Fighter 2 round score: {fighter2Score}");
         Console.ReadLine();
         
-        if(Math.Abs(fighter1Score - fighter2Score) <= 10)
+        if(Math.Abs(fighter1Score - fighter2Score) <= 5)
             this.Winner = null;
         else if(fighter1Score > fighter2Score)
             this.Winner = this.Fighter1;
@@ -145,8 +145,14 @@ public class Round
         Fighter1.GetFighterInfo();
         Fighter2.GetFighterInfo();
 
+        if(fighter1Score - fighter2Score > 30 || fighter2Score-fighter1Score > 30)
+            return RoundResult.DominantWin;
+
+
         if(this.Winner == this.Fighter1)
             return RoundResult.Fighter1Win;
+    
+            
         else if(this.Winner == this.Fighter2)
             return RoundResult.Fighter2Win;
         else

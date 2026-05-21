@@ -17,17 +17,18 @@ public class Fight
         this.Fighter2 = fighter2;
     }
 
-    private void HandleRoundResult(RoundResult result)
+    private void HandleRoundResult(RoundResult result, Fighter roundWinner, Fighter roundLooser)
     {
-        if (result == RoundResult.Fighter1Win)
+        if (result == RoundResult.Fighter1Win || result == RoundResult.Fighter2Win)
         {
-            Fighter1.SetRoundScore(10);
-            Fighter2.SetRoundScore(9);
+            roundWinner.SetRoundScore(10);
+            roundLooser.SetRoundScore(9);
         }
-        else if (result == RoundResult.Fighter2Win)
+        else if(result == RoundResult.DominantWin)
         {
-            Fighter1.SetRoundScore(9);
-            Fighter2.SetRoundScore(10);
+            roundWinner.SetRoundScore(10);
+            roundLooser.SetRoundScore(8);
+
         }
         else
         {
@@ -121,14 +122,29 @@ public class Fight
             {
                 Console.WriteLine("#### KNOCKOUT ####");
 
-                winner = round.Winner;
-                looser = winner == Fighter1 ? Fighter2 : Fighter1;
+                this.winner = round.Winner;
+                this.looser = this.winner == this.Fighter1 ? this.Fighter2 : this.Fighter1;
                 fightEndedEarly = true;
 
                 break;
             }
+            
+            Fighter roundWinner;
+            Fighter roundLooser;
+            if(result == RoundResult.Draw)
+            {
+                roundWinner = Fighter1;
+                roundLooser = Fighter2;
+            }
+            else
+            {
+                roundWinner = round.Winner;
+                roundLooser = roundWinner == this.Fighter1 ? this.Fighter2 : this.Fighter1;
+            }
 
-            this.HandleRoundResult(result);
+            
+
+            this.HandleRoundResult(result, roundWinner, roundLooser);
 
             if (this.currentRound < Rounds)
             {
