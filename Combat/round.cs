@@ -182,7 +182,8 @@ public class Round
         Fighter1.GetFighterInfo();
         Fighter2.GetFighterInfo();
 
-        if(fighter1Score - fighter2Score > 50 || fighter2Score - fighter1Score > 50)
+        const int bigWinNumber = 60;
+        if((fighter1Score - fighter2Score > bigWinNumber && fighter1Score > fighter2Score * 3) || (fighter2Score - fighter1Score > bigWinNumber && fighter2Score > fighter1Score * 3) )
         {
             string winnerName = fighter1Score > fighter2Score ? Fighter1.LastName : Fighter2.LastName;
             string loserName = fighter1Score > fighter2Score ? Fighter2.LastName : Fighter1.LastName;

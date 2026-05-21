@@ -222,6 +222,8 @@ public class Exchange
 
     public ExchangeSummary Run()
     {
+        
+
         this.ResolveInitiative();
         
         Move attackMove = this.Attacker.GetMove();
@@ -232,6 +234,9 @@ public class Exchange
         Debug.LogDetail($"  {this.Defender.LastName} stamina: {this.Defender.Stamina}, momentum: {this.Defender.Momentum}");
 
         Attack attack = this.resolveAttack(attackMove, targetBodypart);
+
+        this.Fighter1.CheckBodyparts();
+        this.Fighter2.CheckBodyparts();
 
         this.handleResult(attack.Outcome, targetBodypart, attackMove);
 

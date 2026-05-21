@@ -66,12 +66,12 @@ public class Fighter
 
         this.Score = 0;
 
-        this.Head = new Bodypart("Head", 100, 45);
-        this.Torso = new Bodypart("Torso", 100, 20);
-        this.LeftArm = new Bodypart("Left Arm", 100, 5);
-        this.RightArm = new Bodypart("Right Arm", 100, 5);
-        this.LeftLeg = new Bodypart("Left Leg", 100, 12);
-        this.RightLeg = new Bodypart("Right Leg", 100, 12);
+        this.Head = new Bodypart("Head", 100, 45, 50, 3);
+        this.Torso = new Bodypart("Torso", 100, 20, 50, 2);
+        this.LeftArm = new Bodypart("Left Arm", 100, 5, 30, 3);
+        this.RightArm = new Bodypart("Right Arm", 100, 5, 30, 3);
+        this.LeftLeg = new Bodypart("Left Leg", 100, 12, 50, 2);
+        this.RightLeg = new Bodypart("Right Leg", 100, 12, 50, 2);
 
         this.Bodyparts = new List<Bodypart>();
         this.Bodyparts.Add(this.Head);
@@ -168,7 +168,7 @@ public class Fighter
         if(this.Momentum > 10)
             this.Momentum = 10;
 
-        Debug.LogDetail($"{this.LastName} momentum {before} → {this.Momentum} (+{ammount})");
+        //Debug.LogDetail($"{this.LastName} momentum {beforeInjuryThreshold} → {this.Momentum} (+{ammount})");
     }
 
     public void DecreaseMomentum(int ammount)
@@ -233,6 +233,8 @@ public class Fighter
         score += this.Momentum;
         score += staminaMod;
         score += this.AggressionMod;
+        score -= this.RightLeg.InjuryPenalty;
+        score -= this.LeftLeg.InjuryPenalty;
 
         Debug.LogDetail($"{this.LastName} initiative: roll={roll}, momentum={this.Momentum}, staminaMod={staminaMod}, aggrMod={this.AggressionMod} → total={score}");
 
@@ -320,12 +322,21 @@ public class Fighter
         return validBodyparts;
     }
 
+    public void CheckBodyparts()
+    {
+        foreach(Bodypart bodypart in this.Bodyparts)
+        {
+            if(bodypart.isInjured())
+                bodypart.applyInjury();
+        }
+    }
+
     public int CalculateDamage(Move move)
     {
         double staminaMultiplier = 0.5 + 0.5 * (double)this.Stamina / this.Cardio;
         int powerModifier = (this.Power - 100) / 10;
 
-        int damage =(int)((move.Damage + powerModifier) * staminaMultiplier);
+        int damage =(int)((move.Damage + powerModifier) * staminaMultiplier) - this.Torso.InjuryPenalty;
 
         return damage;
     }
@@ -389,7 +400,7 @@ public class Fighter
 
         int staminaMod = (int)((1.0 - (double)this.Stamina/this.Cardio) * -10);
 
-        int total = roll + modifier + move.AccuracyModifier + staminaMod;
+        int total = roll + modifier + move.AccuracyModifier + staminaMod - this.Head.InjuryPenalty;
 
         Debug.LogDetail($"  {this.LastName} attack ({move.Name}): roll={roll}, statMod={modifier}, accuracy={move.AccuracyModifier} → {total}");
 
@@ -418,7 +429,7 @@ public class Fighter
                 break;
         }
         int staminaMod = (int)((1.0 - (double)this.Stamina/this.Cardio) * -10);
-        int total = roll + modifier + staminaMod;
+        int total = roll + modifier + staminaMod - this.Head.InjuryPenalty;
 
         Debug.LogDetail($"  {this.LastName} defense ({move.Name}): roll={roll}, statMod={modifier} → {total}");
 
