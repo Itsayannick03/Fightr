@@ -1,10 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "CB2VfTHsHjQ=",
+  "dgSpecHash": "9p/wWCtSINE=",
   "success": true,
-  "projectFilePath": "/home/yyannick/Fightr/Fightr.csproj",
-  "expectedPackageFiles": [
-    "/home/yyannick/.nuget/packages/microsoft.aspnetcore.app.ref/10.0.4/microsoft.aspnetcore.app.ref.10.0.4.nupkg.sha512"
-  ],
+  "projectFilePath": "/home/yannick/fightr/Fightr/Fightr.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }

@@ -101,22 +101,39 @@ public class Fighter
     }
 
     // Info
+    private string InjuryTag(Bodypart bp)
+    {
+        return bp.isInjured() ? $" [INJURED -{bp.InjuryPenalty}]" : "";
+    }
+
     public void GetFighterInfo()
     {
+        int staminaAccDefMod = (int)((1.0 - (double)this.Stamina / this.Cardio) * -10);
+        double staminaDmgMult = 0.5 + 0.5 * (double)this.Stamina / this.Cardio;
+
+        int accPenalty = this.Head.InjuryPenalty;
+        int defPenalty = this.Head.InjuryPenalty;
+        int pwrPenalty = this.Torso.InjuryPenalty;
+        int initPenalty = this.LeftLeg.InjuryPenalty + this.RightLeg.InjuryPenalty;
+
         Console.WriteLine("###############");
         Console.WriteLine($"{this.FirstName} {this.LastName}");
-        Console.WriteLine("Head: " + this.Head.Health);
-        Console.WriteLine("Torso: " + this.Torso.Health);
-        Console.WriteLine("Left Arm: " + this.LeftArm.Health);
-        Console.WriteLine("Right Arm: " + this.RightArm.Health);
-        Console.WriteLine("Left Leg: " + this.LeftLeg.Health);
-        Console.WriteLine("Right Leg: " + this.RightLeg.Health);
+        Console.WriteLine($"Head: {this.Head.Health}{InjuryTag(this.Head)}");
+        Console.WriteLine($"Torso: {this.Torso.Health}{InjuryTag(this.Torso)}");
+        Console.WriteLine($"Left Arm: {this.LeftArm.Health}{InjuryTag(this.LeftArm)}");
+        Console.WriteLine($"Right Arm: {this.RightArm.Health}{InjuryTag(this.RightArm)}");
+        Console.WriteLine($"Left Leg: {this.LeftLeg.Health}{InjuryTag(this.LeftLeg)}");
+        Console.WriteLine($"Right Leg: {this.RightLeg.Health}{InjuryTag(this.RightLeg)}");
 
-        Console.WriteLine("\n");
-        Console.WriteLine("Stamina: " + this.Stamina+ "/" + this.Cardio);
-        Console.WriteLine("Momentum: " + this.Momentum);
+        Console.WriteLine($"\nStamina: {this.Stamina}/{this.Cardio} ({this.Stamina * 100 / this.Cardio}%) → Acc/Def {staminaAccDefMod}, Dmg x{staminaDmgMult:N2}");
+        Console.WriteLine($"Momentum: {this.Momentum}");
+
+        if (accPenalty != 0 || defPenalty != 0 || pwrPenalty != 0 || initPenalty != 0)
+        {
+            Console.WriteLine($"\nBody penalties: Acc {accPenalty}, Def {defPenalty}, Pwr {pwrPenalty}, Init {initPenalty}");
+        }
+
         Console.WriteLine("###############\n");
-
     }
 
     // Stat functions
@@ -343,23 +360,24 @@ public class Fighter
 
     public bool ShouldCircle()
     {
-        int attackChance = this.Aggression;
+        // staminaRatio = Stamina / Cardio (0.0 to 1.0)
+        // circleChance = 20 + (1 - staminaRatio) × 60   ← 20% fresh → 80% exhausted
+        // circleChance -= (Aggression - 50) / 2          ← aggressive fighters attack more
+        // circleChance -= Momentum × 2                   ← confident fighters attack more
 
-        attackChance += this.Momentum * 3;
+        double staminaRatio = (double)this.Stamina / this.Cardio;
+        double circleChance = 20 + (1-staminaRatio) * 60;
 
-        if (this.Stamina < this.Cardio / 3)
-        {
-            attackChance -= 25;
-        }
+        circleChance -= (this.Aggression - 50) / 2;
+        circleChance -= this.Momentum * 2;
 
-        attackChance = Math.Clamp(attackChance, 5, 95);
+        circleChance = Math.Clamp(circleChance, 1, 100);
 
         int roll = Random.Shared.Next(1, 101);
 
-        bool willCircle = roll <= attackChance;
+        bool willCircle = roll <= circleChance;
 
-        Debug.LogDetail($"{this.LastName} ShouldCircle: aggression={this.Aggression}, momentum={this.Momentum}×3, stamina={this.Stamina}/{this.Cardio}");
-        Debug.LogDetail($"  attackChance={attackChance}%, roll={roll}% → {(willCircle ? "circles" : "attacks")}");
+        Debug.Log($"{this.LastName} ShouldCircle: circleChance={(int)circleChance}%, roll={roll}% → {(willCircle ? "circles" : "attacks")} (agg={this.Aggression}, stam={this.Stamina}/{this.Cardio})");
 
         return willCircle;
     }

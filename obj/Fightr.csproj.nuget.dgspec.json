@@ -1,25 +1,26 @@
 {
   "format": 1,
   "restore": {
-    "/home/yyannick/Fightr/Fightr.csproj": {}
+    "/home/yannick/fightr/Fightr/Fightr.csproj": {}
   },
   "projects": {
-    "/home/yyannick/Fightr/Fightr.csproj": {
+    "/home/yannick/fightr/Fightr/Fightr.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/yyannick/Fightr/Fightr.csproj",
+        "projectUniqueName": "/home/yannick/fightr/Fightr/Fightr.csproj",
         "projectName": "Fightr",
-        "projectPath": "/home/yyannick/Fightr/Fightr.csproj",
-        "packagesPath": "/home/yyannick/.nuget/packages/",
-        "outputPath": "/home/yyannick/Fightr/obj/",
+        "projectPath": "/home/yannick/fightr/Fightr/Fightr.csproj",
+        "packagesPath": "/home/yannick/.nuget/packages/",
+        "outputPath": "/home/yannick/fightr/Fightr/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/yyannick/.nuget/NuGet/NuGet.Config"
+          "/home/yannick/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
         ],
         "sources": {
+          "/usr/lib/dotnet/library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -54,18 +55,12 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[10.0.4, 10.0.4]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/share/dotnet/sdk/10.0.104/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/10.0.107/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",

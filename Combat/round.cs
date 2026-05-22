@@ -48,8 +48,6 @@ public class Round
 
     private void DetermainRoundWinner(double fighter1Score, double fighter2Score)
     {
-        Console.WriteLine($"Fighter 1 round score: {fighter1Score}");
-        Console.WriteLine($"Fighter 2 round score: {fighter2Score}");
 
         Debug.Log($"{this.Fighter1.LastName} round score: {fighter1Score:N1}, {this.Fighter2.LastName} round score: {fighter2Score:N1}");
 
@@ -70,7 +68,7 @@ public class Round
             Debug.Log($"Round result: {this.Fighter2.LastName} wins");
         }
 
-        Console.ReadLine();
+        
     }
 
     public void PrintCurrentTime(Timer timer)

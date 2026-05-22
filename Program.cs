@@ -1,6 +1,6 @@
 ﻿Debug.Enabled = true;
 Debug.Detailed = false;
-Debug.StepThrough = false;
+Debug.StepThrough = true;
 
 Fighter fighter1 = new Fighter(
     "Alex",
