@@ -278,6 +278,42 @@ public class Fighter
         return move;
     }
 
+    private int GetComboLength()
+    {
+        int comboLength;
+
+        double staminaMod = (double) this.Stamina / this.Cardio;
+
+        if(staminaMod < 0.3)
+            comboLength = 1;
+        else if(this.Momentum >= 7)
+            comboLength = 3;
+        else if(this.Momentum >= 3)
+            comboLength = 2;
+        else
+            comboLength = 1;
+        
+        if(this.Aggression >= 60)
+            comboLength++;
+        
+        return comboLength;
+    }
+
+    public List<Move> GetCombo()
+    {
+        int comboLength = this.GetComboLength();
+
+        List<Move> combo = new List<Move>();
+
+        for(int i = 0; i < comboLength; i++)
+        {
+            Move move = this.Moves[Random.Shared.Next(this.Moves.Count)];
+            combo.Add(move);
+        }
+
+        return combo;
+    }
+
     public Bodypart GetBodypart(Move move)
     {
         List<Bodypart> validBodyparts = this.GetValidTargetBodyparts(move);
