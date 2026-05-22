@@ -66,11 +66,11 @@ public class Exchange
     }
 
 
-    private Attack resolveAttack(Move attackMove, Bodypart bodypart)
+    private Attack resolveAttack(Move attackMove, Bodypart bodypart, bool skipCircleCheck = false)
     {
         int damage;
         ExchangeOutcome outcome;
-        if(this.Attacker.ShouldCircle())
+        if(!skipCircleCheck && this.Attacker.ShouldCircle())
         {
             Debug.Log($"{this.Attacker.LastName} circles {this.Defender.LastName} (aggression {this.Attacker.Aggression}, stamina {this.Attacker.Stamina}/{this.Attacker.Cardio}, momentum {this.Attacker.Momentum})");
             Debug.LogDetail($"  {this.Attacker.LastName} stamina: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
@@ -220,49 +220,114 @@ public class Exchange
         attacker.IncreaseStat(StatType.DamageDealt, damage);
     }
 
+    private void HandleCombo()
+    {
+        List<Move> combo = this.Attacker.GetCombo();
+
+        foreach(Move move in combo)
+        {
+            Bodypart targetBodypart = this.Defender.GetBodypart(move);
+
+            Attack attack = this.resolveAttack(move, targetBodypart);
+        }
+    }
+
     public ExchangeSummary Run()
     {
-        
-
         this.ResolveInitiative();
-        
-        Move attackMove = this.Attacker.GetMove();
-        Bodypart targetBodypart = this.Defender.GetBodypart(attackMove);
 
-        Debug.Log($"{this.Attacker.LastName} chooses {attackMove.Name} → targets {this.Defender.LastName}'s {targetBodypart.Name}");
-        Debug.LogDetail($"  {this.Attacker.LastName} stamina: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
-        Debug.LogDetail($"  {this.Defender.LastName} stamina: {this.Defender.Stamina}, momentum: {this.Defender.Momentum}");
+        List<Move> combo = this.Attacker.GetCombo();
+        int totalDamage = 0;
+        int totalTime = 0;
+        bool comboBroken = false;
+        bool didCircle = false;
+        int stepsLanded = 0;
+        List<string> narrative = new List<string>();
 
-        Attack attack = this.resolveAttack(attackMove, targetBodypart);
-
-        this.Fighter1.CheckBodyparts();
-        this.Fighter2.CheckBodyparts();
-
-        this.handleResult(attack.Outcome, targetBodypart, attackMove);
-
-        int damage = attack.Damage;
-        
-        ExchangeOutcome exchangeOutcome;
-        if(Fighter1.IsKnockedOut() || Fighter2.IsKnockedOut())
+        for (int step = 0; step < combo.Count; step++)
         {
-            exchangeOutcome = ExchangeOutcome.Knockout;
-            this.HandleStats(damage, this.Attacker);
+            Move attackMove = combo[step];
+            Bodypart targetBodypart = this.Defender.GetBodypart(attackMove);
+
+            Debug.LogDetail($"{this.Attacker.LastName} stamina: {this.Attacker.Stamina}, momentum: {this.Attacker.Momentum}");
+            Debug.LogDetail($"  {this.Defender.LastName} stamina: {this.Defender.Stamina}, momentum: {this.Defender.Momentum}");
+
+            Attack attack = this.resolveAttack(attackMove, targetBodypart, step > 0);
+
+            this.Fighter1.CheckBodyparts();
+            this.Fighter2.CheckBodyparts();
+
+            if (attack.Outcome == ExchangeOutcome.Circle)
+            {
+                this.handleResult(attack.Outcome, targetBodypart, attackMove);
+                didCircle = true;
+                totalTime += this.GetExchangeTime(ExchangeOutcome.Miss);
+                break;
+            }
+
+            if (combo.Count == 1)
+            {
+                this.handleResult(attack.Outcome, targetBodypart, attackMove);
+            }
+
+            if(Fighter1.IsKnockedOut() || Fighter2.IsKnockedOut())
+            {
+                this.HandleStats(attack.Damage, this.Attacker);
+                totalDamage += attack.Damage;
+                totalTime += this.GetExchangeTime(ExchangeOutcome.Knockout);
+
+                if (combo.Count > 1)
+                {
+                    narrative.Add($"lands a {attackMove.Name} to the {targetBodypart.Name} for the KO!");
+                    Console.WriteLine($"{this.Attacker.LastName} throws a {combo.Count}-hit combo! {string.Join(", ", narrative)}");
+                }
+                return new ExchangeSummary(this.Attacker, this.Defender, totalDamage, ExchangeOutcome.Knockout, totalTime);
+            }
+
+            if (attack.Outcome == ExchangeOutcome.Crit || attack.Outcome == ExchangeOutcome.Hit)
+            {
+                if (combo.Count > 1)
+                    narrative.Add($"{(step == 0 ? "lands" : "follows up with")} a {attackMove.Name} to the {targetBodypart.Name}");
+
+                this.HandleStats(attack.Damage, this.Attacker);
+                totalDamage += attack.Damage;
+                stepsLanded++;
+                totalTime += this.GetExchangeTime(ExchangeOutcome.Hit);
+            }
+            else
+            {
+                if (combo.Count > 1)
+                    narrative.Add($"but misses a {attackMove.Name} to the {targetBodypart.Name}");
+
+                this.Attacker.DecreaseMomentum(1);
+                comboBroken = true;
+                totalTime += this.GetExchangeTime(ExchangeOutcome.Miss);
+                break;
+            }
         }
-            
-        else if(attack.Outcome == ExchangeOutcome.Crit || attack.Outcome == ExchangeOutcome.Hit)
+
+        if (didCircle)
         {
-            exchangeOutcome = ExchangeOutcome.Hit;
-            this.HandleStats(damage, this.Attacker);
+            Debug.LogDetail($"  Time taken: {totalTime}s");
+            return new ExchangeSummary(this.Attacker, this.Defender, 0, ExchangeOutcome.Miss, totalTime);
         }
-            
-        else
-            exchangeOutcome = ExchangeOutcome.Miss;
 
-        int timeTaken = this.GetExchangeTime(exchangeOutcome);
+        ExchangeOutcome finalOutcome = totalDamage > 0 ? ExchangeOutcome.Hit : ExchangeOutcome.Miss;
 
-        Debug.LogDetail($"  Time taken: {timeTaken}s");
+        if (combo.Count > 1)
+        {
+            string line = $"{this.Attacker.LastName} throws a {combo.Count}-hit combo! {string.Join(", ", narrative)}";
+            if (!comboBroken && stepsLanded == combo.Count)
+            {
+                int bonus = combo.Count == 3 ? 2 : 1;
+                this.Attacker.IncreaseMomentum(bonus);
+                line += $"! All {combo.Count} land! Momentum +{bonus}";
+            }
+            Console.WriteLine(line);
+        }
 
-        return new ExchangeSummary(this.Attacker, this.Defender, damage, exchangeOutcome, timeTaken);
+        Debug.LogDetail($"  Combo: {stepsLanded}/{combo.Count} landed, total damage: {totalDamage}, time: {totalTime}s");
 
+        return new ExchangeSummary(this.Attacker, this.Defender, totalDamage, finalOutcome, totalTime);
     }
 }

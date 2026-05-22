@@ -1,4 +1,4 @@
-﻿Debug.Enabled = true;
+﻿Debug.Enabled = false;
 Debug.Detailed = false;
 Debug.StepThrough = true;
 
